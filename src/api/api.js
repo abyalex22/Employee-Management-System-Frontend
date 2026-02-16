@@ -1,5 +1,6 @@
 const BASE_URL = "https://localhost:7272/api";
 
+
 async function request(url, options = {}) {
   const res = await fetch(`${BASE_URL}${url}`, {
     headers: {
@@ -8,37 +9,29 @@ async function request(url, options = {}) {
     ...options,
   });
 
-  
-//   if (!res.ok) {
-//   const text = await res.text();
-//   throw {
-//     status: res.status,
-//     message: text || "Request failed",
-//   };
-    if (!res.ok) {
-    let errorData = null;
+  if (!res.ok) {
+    let message = "Request failed";
 
     try {
-      errorData = await res.json(); // for 400 validation errors
+      const data = await res.clone().json(); // clone allows safe read
+      message = data.message || JSON.stringify(data);
     } catch {
-      errorData = await res.text();
+      message = await res.text();
     }
 
     throw {
       status: res.status,
-      data: errorData,
+      message,
     };
-
-
-}
-
-
-  const contentType = res.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) {
-    return null;
   }
 
-  return res.json();
+  const contentType = res.headers.get("content-type");
+
+  if (contentType && contentType.includes("application/json")) {
+    return res.json();
+  }
+
+  return null;
 }
 
 
