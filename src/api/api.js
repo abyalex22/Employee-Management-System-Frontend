@@ -2,36 +2,39 @@ const BASE_URL = "https://localhost:7272/api";
 
 
 async function request(url, options = {}) {
+
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${BASE_URL}${url}`, {
     headers: {
       "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` })
     },
     ...options,
   });
 
   if (!res.ok) {
-    let message = "Request failed";
+  const text = await res.text();
 
-    try {
-      const data = await res.clone().json(); // clone allows safe read
-      message = data.message || JSON.stringify(data);
-    } catch {
-      message = await res.text();
-    }
-
-    throw {
-      status: res.status,
-      message,
-    };
+  /* AUTO LOGOUT IF TOKEN INVALID */
+  if (res.status === 401) {
+    localStorage.clear();
+    window.location.href = "/login";
   }
+
+  throw {
+    status: res.status,
+    message: text || "Request failed",
+  };
+}
+
 
   const contentType = res.headers.get("content-type");
-
-  if (contentType && contentType.includes("application/json")) {
-    return res.json();
+  if (!contentType || !contentType.includes("application/json")) {
+    return null;
   }
 
-  return null;
+  return res.json();
 }
 
 
@@ -55,11 +58,20 @@ export const getAllEmployees = (pageNumber = 1, pageSize = 5, search = "") =>
 export const getEmployeeById = (id) =>
   request(`/employees/${id}`);
 
+// export const updateEmployee = (id, data) =>
+//   request(`/employees/${id}`, {
+//     method: "PUT",
+//     body: JSON.stringify(data),
+//   });
 export const updateEmployee = (id, data) =>
-  request(`/employees/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
+  request(
+    id === "self" ? "/employees/self" : `/employees/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }
+  );
+
 
 /* PHOTO UPDATE */
 export const updateEmployeePhoto = (id, base64) =>

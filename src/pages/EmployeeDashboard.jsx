@@ -48,22 +48,29 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
   const saveChanges = async () => {
     try {
-      await updateEmployee(employee.employeeId, {
+      console.log("saveChanges: submitting", { employeeId: employee.employeeId, form });
+
+      await updateEmployee("self", {
         ...form,
         role: employee.role,
         status: employee.status,
         modifiedBy: user.username,
       });
 
-      setEmployee((prev) => ({
-        ...prev,
-        ...form,
-      }));
+      console.log("saveChanges: update succeeded");
 
-      setShowEdit(false);
+      // show success first so it's visible even if edit modal closes
       setShowSuccess(true);
+      // ensure modal is visible on screen
+      try { window.scrollTo(0, 0); } catch {}
+
+      // close the edit modal after showing success
+      setShowEdit(false);
+
+      // auto-hide success after 3s to help visual confirmation
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
-      console.error(err);
+      console.error("saveChanges failed:", err);
     }
   };
 
@@ -206,8 +213,8 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
       {/* ===== EDIT MODAL ===== */}
       {showEdit && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl px-5 py-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40" style={{ zIndex: 9999 }}>
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl px-5 py-4" style={{ zIndex: 10000 }}>
 
             <h3 className="text-base font-semibold mb-1">
               Edit Profile
@@ -274,8 +281,8 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
       {/* SUCCESS & INACTIVE POPUPS*/}
       {showSuccess && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-slate-900 text-white rounded-2xl p-8 w-full max-w-md text-center shadow-2xl">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50" style={{ zIndex: 9999 }}>
+          <div className="bg-slate-900 text-white rounded-2xl p-8 w-full max-w-md text-center shadow-2xl" style={{ zIndex: 10000 }}>
             <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <div className="text-green-400 text-3xl">✓</div>
             </div>

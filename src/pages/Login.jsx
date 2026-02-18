@@ -8,34 +8,45 @@ export default function Login({ onLogin, onRegister }) {
   const [errorPopup, setErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const submit = async () => {
-    try {
-      setLoading(true);
+ const submit = async () => {
+  try {
+    setLoading(true);
 
-      const data = await login(form);
+    // ✅ CLEAR OLD SESSION FIRST
+    // localStorage.removeItem("token");
+    // localStorage.removeItem("user");
+    localStorage.clear();
 
-      // Block inactive users
-      if (data?.status === "Inactive") {
-        setInactivePopup(true);
-        return;
-      }
 
-      onLogin({ ...data, username: form.username });
+    const data = await login(form);
 
-    } catch (err) {
-      const message = err.message?.toLowerCase() || "";
-
-      // If backend throws inactive error
-      if (message.includes("inactive")) {
-        setInactivePopup(true);
-      } else {
-        setErrorMessage(err.message || "Login failed");
-        setErrorPopup(true);
-      }
-    } finally {
-      setLoading(false);
+    // Block inactive users
+    if (data?.status === "Inactive") {
+      setInactivePopup(true);
+      return;
     }
-  };
+
+    // store JWT token
+    localStorage.setItem("token", data.token);
+
+    // store user object
+    localStorage.setItem("user", JSON.stringify(data));
+
+    onLogin({ ...data, username: form.username });
+
+  } catch (err) {
+    const message = err.message?.toLowerCase() || "";
+
+    if (message.includes("inactive")) {
+      setInactivePopup(true);
+    } else {
+      setErrorMessage(err.message || "Login failed");
+      setErrorPopup(true);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
