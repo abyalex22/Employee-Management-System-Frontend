@@ -49,9 +49,8 @@ export default function AdminDashboard({ user, onLogout }) {
         department: emp.department,
         joiningDate: emp.joiningDate,
         skillSet: emp.skillSet,
-        role: emp.role,
+        role: emp.role || "Employee",
         status: newStatus,
-        modifiedBy: user.username,
       });
     } catch (err) {
       console.error(err);

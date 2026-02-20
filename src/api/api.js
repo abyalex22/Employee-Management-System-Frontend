@@ -39,38 +39,38 @@ async function request(url, options = {}) {
 
 
 export const login = (data) =>
-  request("/auth/login", {
+  request("/v2/auth/login", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
 export const registerEmployee = (data) =>
-  request("/employees/register", {
+  request("/v2/employees", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
+
 export const getAllEmployees = (pageNumber = 1, pageSize = 5, search = "") =>
-  request(
-    `/employees?pageNumber=${pageNumber}&pageSize=${pageSize}&search=${search}`
-  );
+  request(`/v2/employees?page=${pageNumber}&pageSize=${pageSize}&search=${search}`);
+
+
 
 export const getEmployeeById = (id) =>
-  request(`/employees/${id}`);
+  request(`/v2/employees/${id}`);
 
-// export const updateEmployee = (id, data) =>
-//   request(`/employees/${id}`, {
-//     method: "PUT",
-//     body: JSON.stringify(data),
-//   });
 export const updateEmployee = (id, data) =>
   request(
-    id === "self" ? "/employees/self" : `/employees/${id}`,
+    id === "self"
+      ? "/v2/employees/self"
+      : `/v2/employees/${id}`,
     {
       method: "PUT",
       body: JSON.stringify(data),
     }
   );
+
+
 
 
 /* PHOTO UPDATE */
